@@ -10,6 +10,9 @@ from collections import deque
 
 from scoring import *
 
+class McOsu(gym.Env):
+    # coming soon
+
 
 class Osu(gym.Env):
     def __init__(self, bounding_box, hardcode_list, done_screen):
