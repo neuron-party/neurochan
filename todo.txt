@@ -8,6 +8,9 @@ issues to fix:
     * (fixed!) add a more consistent way of determining the 'done' parameter in env.step()
     * (fixed!) first few digits in the scoring function have consistent mistakes 
     * pyautogui literally does not move around in osu (need a different package)
+    * (fixed!) new vision algo mistakes 1 for 4 (hardcode blue and white individually?) 
+        * optimized vision scoring algo, significantly reduced computation time by optimized data structures used
+        * updated assets for osu and mcosu static files
     
 observations:
     * calculating rewards on a per-frame basis results in certain time steps giving very little - no rewards,

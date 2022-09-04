@@ -8,10 +8,7 @@ import numpy as np
 from mss import mss
 from collections import deque
 
-from scoring import *
-
-class McOsu(gym.Env):
-    # coming soon
+from utils.scoring import *
 
 
 class Osu(gym.Env):
@@ -55,7 +52,7 @@ class Osu(gym.Env):
             self.done = True
         
         score = frame[0:30, 675:800, :]
-        score = int(get_score(score, self.hardcode_list))
+        score = int(get_score_2(score, self.hardcode_list))
         
         # error catch for when the score is noticeably miscalcualted
         if (len(str(score)) - len(str(self.last_score)) > 2 or self.last_score > score): 
