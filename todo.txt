@@ -1,9 +1,9 @@
 
 1. add deepmind wrapper for osu env (frameskip/framestacking, rgb->gs?)
 2. add standard functions for env i.e get_random_action, etc
-3. move global game conditions to a config file or something
+3. make it so rewards in env.step() return incremental rewards, not the entire score at each time step
 
 issues to fix:
-    * add a more consistent way of determining the 'done' parameter in env.step()
+    * (fixed!) add a more consistent way of determining the 'done' parameter in env.step()
     * (fixed!) first few digits in the scoring function have consistent mistakes 
     * pyautogui literally does not move around in osu (need a different package)
