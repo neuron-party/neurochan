@@ -48,9 +48,8 @@ class Osu(gym.Env):
         score = frame[0:30, 675:800, :]
         score = int(get_score(score))
         
-        if str(score)[0:4] == '3333':
-            self.done = True
-            return frame, self.last_score, self.done
+        if len(str(score)) - len(str(self.last_score)) > 2 or self.last_score > score: # error catch for when the score is noticeably miscalcualted
+            score = self.last_score
             
         self.last_score = score
         return frame, score, self.done
