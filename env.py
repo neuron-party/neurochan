@@ -5,12 +5,13 @@ import random
 import pyautogui
 import numpy as np
 from mss import mss
+from collections import deque
 
 from scoring import *
 
 
 class Osu(gym.Env):
-    def __init__(self):
+    def __init__(self, bounding_box, hardcode_list, done_screen):
         super().__init__()
         
         self.action_space = gym.spaces.Discrete(100)
@@ -25,12 +26,16 @@ class Osu(gym.Env):
         
         # parameters for screen capture
         self.bounding_box = bounding_box
+        self.hardcode_list = hardcode_list
+        self.done_screen = done_screen
         
         self.sc = mss()
         # current frame
         self.current_frame = np.array(self.sc.grab(self.bounding_box))[:, :, 0:3]
         self.last_score = 0
         self.done = False
+        
+        self.score_buffer = deque(maxlen=100)
         
     def step(self, action): # action 
         
@@ -39,22 +44,32 @@ class Osu(gym.Env):
         sct_img = self.sc.grab(self.bounding_box)
         frame = np.array(sct_img)[:, :, 0:3]
         
-        # not the most optimal solution for a done screen?
-        if sum(sum(sum(frame == done_screen))) >= 1400000:
+        # recognizes that the retry screen has appeared, error catch for done parameters 1 and 2
+        if (sum(sum(sum(frame == self.done_screen))) >= 1300000):
             self.done = True
         
-        # janky solution, but algorithm always recognizes the leading zeros as '3' when the screen dims upon 'map death' 
-        # so i think we can take advantage of this for the environment to use as the done parameter
-        score = frame[0:30, 675:800, :]
-        score = int(get_score(score))
+        # in osu, if score != 0 and does not change for some time (no hits), health decays rapidly
+        # can use this functionality as a 'done' parameter
+        if (len(self.score_buffer) == self.score_buffer.maxlen) and (len(set(self.score_buffer)) == 1 and self.score_buffer[0] != 0):
+            self.done = True
         
-        if len(str(score)) - len(str(self.last_score)) > 2 or self.last_score > score: # error catch for when the score is noticeably miscalcualted
+        score = frame[0:30, 675:800, :]
+        score = int(get_score(score, self.hardcode_list))
+        
+        # error catch for when the score is noticeably miscalcualted
+        if (len(str(score)) - len(str(self.last_score)) > 2 or self.last_score > score): 
             score = self.last_score
-            
+        
+        self.score_buffer.append(score)
+        
         self.last_score = score
         return frame, score, self.done
     
     def reset(self):
+        self.score_buffer.clear()
+        self.last_score = 0
+        self.done = False
+        
         # 960, 535 - reset coordinate
         
         # need to click twice for some reason
@@ -65,12 +80,9 @@ class Osu(gym.Env):
         
         # time.sleep(5) ensures that screen capturing does not begin in the very early stages of the map,
         # where get_score() function struggles due to the dimness of the entire map as it is loading in
-        time.sleep(5)
+        time.sleep(3)
         
     
     def _apply_action(self, action):
         x, y = action # mouse click
         pyautogui.click(x, y)
-
-    # def reset(self): 
-    #     return
