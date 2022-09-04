@@ -3,6 +3,7 @@ import gym
 import time
 import random
 import pyautogui
+import win32api
 import numpy as np
 from mss import mss
 from collections import deque
@@ -30,16 +31,13 @@ class Osu(gym.Env):
         self.done_screen = done_screen
         
         self.sc = mss()
-        # current frame
-        self.current_frame = np.array(self.sc.grab(self.bounding_box))[:, :, 0:3]
         self.last_score = 0
         self.done = False
-        
         self.score_buffer = deque(maxlen=100)
         
     def step(self, action): # action 
         
-        # self._apply_action(action)
+        self._apply_action(action)
         
         sct_img = self.sc.grab(self.bounding_box)
         frame = np.array(sct_img)[:, :, 0:3]
@@ -61,8 +59,10 @@ class Osu(gym.Env):
             score = self.last_score
         
         self.score_buffer.append(score)
+        reward = score - self.last_score
         
         self.last_score = score
+        
         return frame, score, self.done
     
     def reset(self):
@@ -78,11 +78,19 @@ class Osu(gym.Env):
         time.sleep(1)
         pyautogui.click(960, 535)
         
-        # time.sleep(5) ensures that screen capturing does not begin in the very early stages of the map,
+        # time.sleep(n) ensures that screen capturing does not begin in the very early stages of the map,
         # where get_score() function struggles due to the dimness of the entire map as it is loading in
         time.sleep(3)
         
+        # current frame
+        self.current_frame = np.array(self.sc.grab(self.bounding_box))[:, :, 0:3]
+        return self.current_frame
     
     def _apply_action(self, action):
         x, y = action # mouse click
-        pyautogui.click(x, y)
+        # pyautogui moveto/dragto functions don't work within an osu beatmap; clicks work though (anticheat????)
+        # pyautogui.moveTo(x, y) # currently moveto doesnt work in osu, anticheat?
+        # pyautogui.dragTo(x, y)
+        win32api.SetCursorPos(action)
+        time.sleep(0.1) # wait 0.1 seconds?
+        pyautogui.click()
