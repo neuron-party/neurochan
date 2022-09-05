@@ -10,6 +10,14 @@ class McOsuWrapper(gym.Wrapper):
         self.k = k
         self.frame_stack = deque(maxlen=k)
         
+        # stable-baselines3 integration
+        self.observation_space = gym.spaces.Box(
+            low=0,
+            high=255,
+            shape=(4, 80, 80),
+            dtype=np.uint8
+        )
+        
     def reset(self):
         frame = self.env.reset()
         state = self._process(frame)
@@ -34,7 +42,7 @@ class McOsuWrapper(gym.Wrapper):
                 done = True
                 break
                 
-        return np.stack(self.frame_stack), total_reward, done
+        return np.stack(self.frame_stack), total_reward, done, {}
     
     def _process(self, frame):
         '''

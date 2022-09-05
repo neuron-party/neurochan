@@ -7,7 +7,8 @@
 6. ### try ray actor critic agents, implement my own after they are confirmed to work
 7. using stable baselines3
 8. (done!) make env compatible with stable baselines3 (env_checker)
-    8.5 make env WRAPPER compatible too? (not sure if necessary though)
+    8.5 (done!) make env WRAPPER compatible too? (not sure if necessary though)
+        NOTE: STABLE BASELINES3 IS ASS
 
 issues to fix:
     * (fixed!) add a more consistent way of determining the 'done' parameter in env.step()
@@ -16,7 +17,7 @@ issues to fix:
     * (fixed!) new vision algo mistakes 1 for 4 (hardcode blue and white individually?) 
         * optimized vision scoring algo, significantly reduced computation time by optimized data structures used
         * updated assets for osu and mcosu static files
-    * random agent clicks so rapidly sometimes that it will accidentally immediately click the restart button without the environment getting a chance to reset
+    * (fixed!) random agent clicks so rapidly sometimes that it will accidentally immediately click the restart button without the environment getting a chance to reset
     
 observations:
     * calculating rewards on a per-frame basis results in certain time steps giving very little - no rewards,

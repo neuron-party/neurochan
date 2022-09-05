@@ -33,7 +33,8 @@ class McOsu(gym.Env):
         self.action_space = gym.spaces.Box(
             low=np.array([self.xl_bound, self.yt_bound]),
             high=np.array([self.xr_bound, self.yb_bound]),
-            shape=(2, )
+            shape=(2, ),
+            dtype=np.float32
         )
         
         # screen capture resolution (h, w)
@@ -41,7 +42,8 @@ class McOsu(gym.Env):
         self.observation_space = gym.spaces.Box(
             low=0,
             high=255,
-            shape=self.resolution
+            shape=self.resolution,
+            dtype=np.uint8
         )
         
         self.sc = mss()
@@ -116,6 +118,7 @@ class McOsu(gym.Env):
             action = np.random.randint(self.xl_bound, self.xr_bound), np.random.randint(self.yt_bound, self.yb_bound)
         else:
             action = None
+            
         return action
         
         
