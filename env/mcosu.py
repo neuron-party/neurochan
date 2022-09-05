@@ -5,6 +5,7 @@ import time
 import random
 import pyautogui
 import win32api
+import pydirectinput
 import numpy as np
 from mss import mss
 from collections import deque
@@ -39,7 +40,7 @@ class McOsu(gym.Env):
         
     def step(self, action): # action 
         
-        # self._apply_action(action)
+        self._apply_action(action)
         
         sct_img = self.sc.grab(self.bounding_box)
         frame = np.array(sct_img)[:, :, 0:3]
@@ -72,19 +73,24 @@ class McOsu(gym.Env):
         self.last_score = 0
         self.done = False
         
-        time.sleep(1)
+        time.sleep(10) # wait for death animation to finish and reset screen to pop up
+        
+        
         pyautogui.moveTo(990, 535)
         time.sleep(1)
         leftClick() # win32api, pyautogui doesnt work for click
         
-        time.sleep(3)
+        time.sleep(3) # wait for beatmap to load in 
         
         # current frame
         self.current_frame = np.array(self.sc.grab(self.bounding_box))[:, :, 0:3]
         return self.current_frame
     
     def _apply_action(self, action):
-        x, y = action # mouse click
-        win32api.SetCursorPos(action)
-        time.sleep(0.1) # wait 0.1 seconds?
-        pyautogui.click()
+        # conquer relax mode first:
+            # actions are either moveTo(x, y), or do nothing
+        x, y = action
+        # win32api.SetCursorPos(action)
+        pydirectinput.moveTo(x, y)
+        time.sleep(0.1)
+        leftClick()
