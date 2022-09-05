@@ -3,7 +3,7 @@
 2. add standard functions for env i.e get_random_action, etc
 3. (done!) make it so rewards in env.step() return incremental rewards, not the entire score at each time step
 4. resize images to lower res if faster computation time is needed, does not affect vision-scoring algorithm
-5. modify env so it supports automated multi epoch training
+5. (done!) modify env so it supports automated multi epoch training
 6. try ray actor critic agents, implement my own after they are confirmed to work
 
 issues to fix:

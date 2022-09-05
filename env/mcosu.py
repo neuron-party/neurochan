@@ -33,6 +33,13 @@ class McOsu(gym.Env):
         self.hardcode_list = hardcode_list
         self.done_screen = done_screen
         
+        # apply a margin to the screen since no circles appear on the very left/right/top/bottom of the map
+        margin = 30
+        self.xl_bound = self.bounding_box['left'] + margin
+        self.xr_bound = self.bounding_box['left'] + self.bounding_box['width'] - margin
+        self.yt_bound = self.bounding_box['top'] + margin
+        self.yb_bound = self.bounding_box['top'] + self.bounding_box['height'] - margin
+        
         self.sc = mss()
         self.last_score = 0
         self.done = False
@@ -57,6 +64,9 @@ class McOsu(gym.Env):
         score = frame[13:40, 650:800, :]
         score = int(get_score(score, self.hardcode_list))
         
+        # resize 
+        state = self._downscale(frame)
+        
         # error catch for when the score is noticeably miscalcualted
         if (len(str(score)) - len(str(self.last_score)) > 2 or self.last_score > score): 
             score = self.last_score
@@ -66,31 +76,52 @@ class McOsu(gym.Env):
         
         self.last_score = score
         
-        return frame, score, self.done
+        return state, reward, self.done
     
     def reset(self):
         self.score_buffer.clear()
         self.last_score = 0
         self.done = False
         
-        time.sleep(10) # wait for death animation to finish and reset screen to pop up
+        time.sleep(5) # wait for death animation to finish and reset screen to pop up
         
         
-        pyautogui.moveTo(990, 535)
+        pydirectinput.moveTo(990, 535)
         time.sleep(1)
         leftClick() # win32api, pyautogui doesnt work for click
         
-        time.sleep(3) # wait for beatmap to load in 
+        time.sleep(1) # wait for beatmap to load in 
         
         # current frame
         self.current_frame = np.array(self.sc.grab(self.bounding_box))[:, :, 0:3]
-        return self.current_frame
+        state = self._downscale(self.current_frame)
+        return state
     
     def _apply_action(self, action):
-        # conquer relax mode first:
-            # actions are either moveTo(x, y), or do nothing
+        # conquer relax mode first
+        # actions are either moveTo(x, y), or do nothing
+        
+        if action is None: # do nothing
+            return 
+        
         x, y = action
-        # win32api.SetCursorPos(action)
         pydirectinput.moveTo(x, y)
-        time.sleep(0.1)
-        leftClick()
+        # leftClick()
+        
+    def _downscale(self, frame):
+        '''
+        downscale frame for memory/computation efficiency
+        '''
+        state = cv2.resize(cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY), dsize=(80, 60))
+        return state
+    
+    def _get_random_action(self, margin=30):
+        if np.random.rand() > 0.5:
+            action = np.random.randint(self.xl_bound, self.xr_bound), np.random.randint(self.yt_bound, self.yb_bound)
+        else:
+            action = None
+        return action
+        
+        
+        
+        
