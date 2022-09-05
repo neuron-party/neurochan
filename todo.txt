@@ -4,7 +4,10 @@
 3. (done!) make it so rewards in env.step() return incremental rewards, not the entire score at each time step
 4. resize images to lower res if faster computation time is needed, does not affect vision-scoring algorithm
 5. (done!) modify env so it supports automated multi epoch training
-6. try ray actor critic agents, implement my own after they are confirmed to work
+6. ### try ray actor critic agents, implement my own after they are confirmed to work
+7. using stable baselines3
+8. (done!) make env compatible with stable baselines3 (env_checker)
+    8.5 make env WRAPPER compatible too? (not sure if necessary though)
 
 issues to fix:
     * (fixed!) add a more consistent way of determining the 'done' parameter in env.step()

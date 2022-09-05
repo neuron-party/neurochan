@@ -18,16 +18,6 @@ class McOsu(gym.Env):
     def __init__(self, bounding_box, hardcode_list, done_screen):
         super().__init__()
         
-        self.action_space = gym.spaces.Discrete(100)
-        
-        # screen capture resolution (h, w)
-        self.resolution = (600, 800, 3)
-        self.observation_space = gym.spaces.Box(
-            low=0,
-            high=255,
-            shape=self.resolution
-        )
-        
         # parameters for screen capture
         self.bounding_box = bounding_box
         self.hardcode_list = hardcode_list
@@ -39,6 +29,20 @@ class McOsu(gym.Env):
         self.xr_bound = self.bounding_box['left'] + self.bounding_box['width'] - margin
         self.yt_bound = self.bounding_box['top'] + margin
         self.yb_bound = self.bounding_box['top'] + self.bounding_box['height'] - margin
+        
+        self.action_space = gym.spaces.Box(
+            low=np.array([self.xl_bound, self.yt_bound]),
+            high=np.array([self.xr_bound, self.yb_bound]),
+            shape=(2, )
+        )
+        
+        # screen capture resolution (h, w)
+        self.resolution = (600, 800, 3)
+        self.observation_space = gym.spaces.Box(
+            low=0,
+            high=255,
+            shape=self.resolution
+        )
         
         self.sc = mss()
         self.last_score = 0
@@ -64,9 +68,6 @@ class McOsu(gym.Env):
         score = frame[13:40, 650:800, :]
         score = int(get_score(score, self.hardcode_list))
         
-        # resize 
-        state = self._downscale(frame)
-        
         # error catch for when the score is noticeably miscalcualted
         if (len(str(score)) - len(str(self.last_score)) > 2 or self.last_score > score): 
             score = self.last_score
@@ -76,7 +77,8 @@ class McOsu(gym.Env):
         
         self.last_score = score
         
-        return state, reward, self.done
+        # stable baselines3 asserts 4 return values (where info must be a python dictionary)
+        return frame, reward, self.done, {}
     
     def reset(self):
         self.score_buffer.clear()
@@ -94,8 +96,7 @@ class McOsu(gym.Env):
         
         # current frame
         self.current_frame = np.array(self.sc.grab(self.bounding_box))[:, :, 0:3]
-        state = self._downscale(self.current_frame)
-        return state
+        return self.current_frame
     
     def _apply_action(self, action):
         # conquer relax mode first
@@ -105,15 +106,10 @@ class McOsu(gym.Env):
             return 
         
         x, y = action
+        x, y = int(x), int(y)
+        
         pydirectinput.moveTo(x, y)
         # leftClick()
-        
-    def _downscale(self, frame):
-        '''
-        downscale frame for memory/computation efficiency
-        '''
-        state = cv2.resize(cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY), dsize=(80, 60))
-        return state
     
     def _get_random_action(self, margin=30):
         if np.random.rand() > 0.5:
