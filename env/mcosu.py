@@ -51,6 +51,8 @@ class McOsu(gym.Env):
         self.done = False
         self.score_buffer = deque(maxlen=100)
         
+        self.q_table = np.load('env/q_table.npy')
+        
     def step(self, action): # action 
         
         self._apply_action(action)
@@ -80,6 +82,7 @@ class McOsu(gym.Env):
         self.last_score = score
         
         # stable baselines3 asserts 4 return values (where info must be a python dictionary)
+        frame = self.process_frame(frame)
         return frame, reward, self.done, {}
     
     def reset(self):
@@ -98,16 +101,17 @@ class McOsu(gym.Env):
         
         # current frame
         self.current_frame = np.array(self.sc.grab(self.bounding_box))[:, :, 0:3]
+        self.current_frame = self.process_frame(self.current_frame)
         return self.current_frame
     
     def _apply_action(self, action):
         # conquer relax mode first
         # actions are either moveTo(x, y), or do nothing
         
-        if action is None: # do nothing
+        if action == 30000: # do nothing
             return 
         
-        x, y = action
+        x, y = self.q_table[action]
         x, y = int(x), int(y)
         
         pydirectinput.moveTo(x, y)
@@ -115,12 +119,17 @@ class McOsu(gym.Env):
     
     def _get_random_action(self, margin=30):
         if np.random.rand() > 0.5:
-            action = np.random.randint(self.xl_bound, self.xr_bound), np.random.randint(self.yt_bound, self.yb_bound)
+            action = np.random.randint(0, 30000)
+            loc = self.q_table[action]
+            pydirectinput.moveTo(loc[0], loc[1])
         else:
             action = None
             
         return action
         
-        
+    def process_frame(self, ob):
+        ob = cv2.cvtColor(ob, cv2.COLOR_BGR2GRAY)
+        ob = cv2.resize(ob, dsize=(84, 84))
+        return ob
         
         
