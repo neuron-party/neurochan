@@ -212,7 +212,7 @@ class DeepmindCNN(nn.Module):
             nn.Flatten(),
             nn.Linear(3136, 512),
             nn.ReLU(),
-            nn.Linear(512, 30000)
+            nn.Linear(512, 30001)
         ]
         
         self.network = nn.Sequential(*network)
