@@ -1,4 +1,5 @@
 
+RL:
 1. add deepmind wrapper for osu env (frameskip/framestacking, rgb->gs?)
 2. add standard functions for env i.e get_random_action, etc
 3. (done!) make it so rewards in env.step() return incremental rewards, not the entire score at each time step
@@ -23,3 +24,8 @@ observations:
     * calculating rewards on a per-frame basis results in certain time steps giving very little - no rewards,
       not sure if this will cause issue with agent training though (i.e lag between a hit and the score updating may
       result in 0 reward at a given timestep
+      
+   
+OD:
+1. beatmapparser gives hitobject locations
+2. how can i automate dataset generation to train the network on?
