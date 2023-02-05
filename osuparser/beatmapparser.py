@@ -3,8 +3,7 @@ import math
 import os
 import re
 
-import slidercalc
-
+from osuparser.slidercalc import *
 
 # Translated from JavaScript to Python by Awlex
 
@@ -228,7 +227,7 @@ class BeatmapParser():
                     hit_object["edges"].append(edge)
 
             # get coordinates of the slider endpoint
-            end_point = slidercalc.get_end_point(hit_object["curveType"], hit_object["pixelLength"],
+            end_point = get_end_point(hit_object["curveType"], hit_object["pixelLength"],
                                                  hit_object["points"])
             if end_point and end_point[0] and end_point[1]:
                 hit_object["end_position"] = [

@@ -46,11 +46,11 @@ def point_at_distance(array, distance):
         return [array[0][0], array[0][1], angle, 0]
 
     if distance_from_points(array) <= distance:
-        angle = angle_from_points(array[len(array) - 2], array[len(array) - 1])
-        return [array[len(array) - 1][0],
-                array[len(array) - 1][1],
+        angle = angle_from_points(array[array.length - 2], array[array.length - 1])
+        return [array[array.length - 1][0],
+                array[array.length - 1][1],
                 angle,
-                len(array) - 2]
+                array.length - 2]
 
     for i in range(len(array) - 2):
         x = (array[i][0] - array[i + 1][0])

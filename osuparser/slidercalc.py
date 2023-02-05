@@ -1,5 +1,5 @@
 import math
-from curve import Bezier
+from osuparser.curve import Bezier
 
 
 # Translated from JavaScript to Python by Awlex
